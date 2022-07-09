@@ -1,0 +1,19 @@
+---
+booruMicro
+-- replacement lib for booru34sh in only pure sh & curl
+---- some features may be missing
+---
+Usage
+-- ./booru34sh <service> "<tags>"
+---- ./booru34sh r34 "femboy+anal"
+---- +'s must be used
+---
+Current sites/services
+-- e621
+---- searchs e621 using given tags
+---- uses e621's RAW html api
+---- may be throttled
+-- r34
+---- searches r34/rule34.xxx
+---- uses classic XML api
+---

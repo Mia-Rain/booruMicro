@@ -1,0 +1,61 @@
+#!/bin/sh
+has() {
+  case "$(command -v $1 2>/dev/null)" in
+    alias*|"") return 1
+  esac
+}
+deps() {
+  deps="curl"
+  missing=0
+  for i in $deps; do
+    has $i || { echo "$i IS MISSING!"; exit 1; }
+  done
+  # Check for ssl
+  curl -V | grep tls -i -q || {
+    curl -V | grep ssl -i -q || {
+      echo "!!SSL/TLS SUPPORT IS MISSING FROM CURL!!"
+      echo "!!SOME SERVICES MAY NOT CONNECT!!"
+      http="http"
+    }
+  }
+  [ ! "$http" ] && http="https" # default to https
+}
+count() {
+  c=0; IFS=' +'; for i in $1; do
+    : $((c+=1))
+  done
+  echo "$c"
+  # pure shell counter function
+
+  # heredocs are used as piping to the while loop puts the while loop in a subshell
+  # due to this subshell the value of $c is forgotten once the loop ends
+  # heredocs don't create a subshell, but are able to redirect the contents of a subshell
+  unset IFS
+}
+rule34(){
+  while read -r p || [ "$p" ]; do
+    F="${p##*file_url=?}"; F="${F%%? parent_id*}"
+    [ "$F" = "$p" ] && continue # skip line if above has chaned nothing
+    printf '%s:' "$F"
+    I="${p##* id=?}"; I="${I%%? width*}"; printf '%s\n' "$I"
+  done << EOF
+$(curl -sL "$http://rule34.xxx//index.php?page=dapi&s=post&q=index&tags=$2&limit=1000&pid=${pid:-0}&json=0")
+EOF
+}
+e621(){
+  while read -r p || [ "$p" ]; do
+    F="${p##* data-file-url=?}"; F="${F%%? data-large-file-url*}"
+    [ "$F" = "$p" ] && continue # skip line if above has chaned nothing
+    printf '%s:' "$F"
+    I="${p##* data-id=?}"; I="${I%%? data-has-sound*}"; printf '%s\n' "$I"
+  done << EOF
+ $(curl -sL "$http://e621.net/posts?tags=$2&limit=120" --user-agent "booruMicro (https://dicksdeathabove.xyz/~mia/booruMicro)")
+EOF
+# e621 requires a UA
+}
+deps
+case "$1" in
+  r34|rule34|e621)
+    [ "$1" = "r34" ] && { rule34 "$@"; exit 0; } || { ${1} "$@"; };;
+  *) echo "Please select a service.."; exit 1
+esac
