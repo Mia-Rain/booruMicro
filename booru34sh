@@ -49,7 +49,7 @@ e621(){
     printf '%s:' "$F"
     I="${p##* data-id=?}"; I="${I%%? data-has-sound*}"; printf '%s\n' "$I"
   done << EOF
- $(curl -sL "$http://e621.net/posts?tags=$2&limit=120" --user-agent "booruMicro (https://dicksdeathabove.xyz/~mia/booruMicro)")
+ $(curl -sL "$http://e621.net/posts?tags=$2&limit=120" --user-agent "booruMicro (https://g.transcendent.ink/booruMicro)")
 EOF
 # e621 requires a UA
 }
